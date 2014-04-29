@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="ContextMenu.cpp" />
+    <ClCompile Include="LastFm.cpp" />
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="BestVersion.cpp" />
+    <ClCompile Include="DatabaseScopeLock.cpp" />
+    <ClCompile Include="PlaylistGenerator.cpp" />
+    <ClCompile Include="TextToPlaylistDialogue.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="ContextMenu.h" />
+    <ClInclude Include="LastFm.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="BestVersion.h" />
+    <ClInclude Include="Maths.h" />
+    <ClInclude Include="FoobarSDKWrapper.h" />
+    <ClInclude Include="DatabaseScopeLock.h" />
+    <ClInclude Include="PlaylistGenerator.h" />
+    <ClInclude Include="ToString.h" />
+    <ClInclude Include="TextToPlaylistDialogue.h" />
+    <ClInclude Include="ATLHelpersWrapper.h" />
+    <ClInclude Include="RapidJsonWrapper.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+</Project>
