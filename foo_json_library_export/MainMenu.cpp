@@ -7,7 +7,7 @@ static const GUID g_mainmenu_group_id = { 0x1e5e0ccd, 0xae63, 0x45fa, { 0xa5, 0x
 
 static mainmenu_group_popup_factory g_mainmenu_group(
 	g_mainmenu_group_id,
-	mainmenu_groups::file,
+	mainmenu_groups::library,
 	static_cast<t_uint32>(mainmenu_commands::sort_priority_dontcare),
 	"foo_json_library_export"
 );
