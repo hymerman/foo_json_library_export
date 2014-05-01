@@ -11,6 +11,27 @@
 #include <memory>
 #include <regex>
 
+namespace
+{
+	pfc::string8 title_format(const metadb_handle_ptr& track, const file_info& fileInfo, const titleformat_object::ptr& script)
+	{
+		pfc::string8 formatted;
+		track->format_title_from_external_info_nonlocking(fileInfo, nullptr, formatted, script, nullptr);
+		return formatted;
+	}
+
+	// string_key must exist until after the JSON object is destroyed, as a copy will not be taken.
+	void add_string_value_to_json_object_if_not_empty(const char* string_key, const pfc::string8& string_value, rapidjson::Value& json_object, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>& allocator)
+	{
+		if(!string_value.is_empty())
+		{
+			rapidjson::Value json_value(string_value.get_ptr(), allocator);
+			json_object.AddMember(string_key, json_value, allocator);
+		}
+	}
+
+} // anonymous namespace
+
 namespace libraryexport
 {
 
@@ -62,11 +83,35 @@ private:
 		// Lock the database for the duration of this scope.
 		DatabaseScopeLock databaseLock;
 
-		// JSON will be formatted as such:
-		// [{"path":"path/to/1", "title":"abc"},{"path":"path/to/2", "title":"def"}]
+		// Compile titleformatting scripts ahead of time.
+		console::print("Compiling titleformatting scripts ahead of time.");
+
+		static_api_ptr_t<titleformat_compiler> compiler;
+
+		// Playback statistics fields.
+		titleformat_object::ptr first_played_script;
+		compiler->compile_force(first_played_script, "[%first_played%]");
+		titleformat_object::ptr last_played_script;
+		compiler->compile_force(last_played_script, "[%last_played%]");
+		titleformat_object::ptr play_count_script;
+		compiler->compile_force(play_count_script, "[%play_count%]");
+		titleformat_object::ptr added_script;
+		compiler->compile_force(added_script, "[%added%]");
+		titleformat_object::ptr rating_script;
+		compiler->compile_force(rating_script, "[%rating%]");
+
+		// foo_customdb fields when using marc2003's last.fm sync scripts.
+		titleformat_object::ptr lastfm_playcount_script;
+		compiler->compile_force(lastfm_playcount_script, "[%LASTFM_PLAYCOUNT_DB%]");
+		titleformat_object::ptr lastfm_loved_script;
+		compiler->compile_force(lastfm_loved_script, "[%LASTFM_LOVED_DB%]");
+
+		// todo: allow user to specify list of extra titleformatting snippets they wish to be saved.
 
 		console::print("Creating in-memory JSON.");
 
+		// JSON will be formatted as such:
+		// [{"path":"path/to/1", "title":"abc"},{"path":"path/to/2", "title":"def"}]
 		rapidjson::Document document;
 		document.SetArray();
 
@@ -74,7 +119,7 @@ private:
 
 		document.Reserve(library.get_count(), allocator);
 
-		library.enumerate([&document, &allocator](const metadb_handle_ptr& track) {
+		library.enumerate([&](const metadb_handle_ptr& track) {
 			const file_info* fileInfo = nullptr;
 			const bool success = track->get_info_locked(fileInfo);
 
@@ -186,6 +231,44 @@ private:
 				}
 
 				trackValue.AddMember("meta", metaValue, allocator);
+			}
+
+			// Playback statistics. I don't know if there's an API for the component, or if that's even possible,
+			// so we do the expensive and inextensible thing and query for its fields using titleformatting.
+			// Scripts have already been compiled; we just need to format the track with them and add their values
+			// if present.
+
+			const pfc::string8 first_played_string		= title_format(track, *fileInfo, first_played_script);
+			const pfc::string8 last_played_string		= title_format(track, *fileInfo, last_played_script);
+			const pfc::string8 play_count_string		= title_format(track, *fileInfo, play_count_script);
+			const pfc::string8 added_string				= title_format(track, *fileInfo, added_script);
+			const pfc::string8 rating_string			= title_format(track, *fileInfo, rating_script);
+
+			const pfc::string8 lastfm_playcount_string	= title_format(track, *fileInfo, lastfm_playcount_script);
+			const pfc::string8 lastfm_loved_string		= title_format(track, *fileInfo, lastfm_loved_script);
+
+			if( !first_played_string.is_empty()		||
+				!last_played_string.is_empty()		||
+				!play_count_string.is_empty()		||
+				!added_string.is_empty()			||
+				!rating_string.is_empty()			||
+				!lastfm_playcount_string.is_empty()	||
+				!lastfm_loved_string.is_empty()
+			)
+			{
+				rapidjson::Value playback_stats_value;
+				playback_stats_value.SetObject();
+
+				add_string_value_to_json_object_if_not_empty("first_played"	, first_played_string		, playback_stats_value, allocator);
+				add_string_value_to_json_object_if_not_empty("last_played"	, last_played_string		, playback_stats_value, allocator);
+				add_string_value_to_json_object_if_not_empty("play_count"	, play_count_string			, playback_stats_value, allocator);
+				add_string_value_to_json_object_if_not_empty("added"		, added_string				, playback_stats_value, allocator);
+				add_string_value_to_json_object_if_not_empty("rating"		, rating_string				, playback_stats_value, allocator);
+
+				add_string_value_to_json_object_if_not_empty("lastfm_playcount"	, lastfm_playcount_string	, playback_stats_value, allocator);
+				add_string_value_to_json_object_if_not_empty("lastfm_loved"		, lastfm_loved_string		, playback_stats_value, allocator);
+
+				trackValue.AddMember("playback_stats", playback_stats_value, allocator);
 			}
 
 			// Finally, add the whole track object to the document.
