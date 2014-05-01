@@ -268,7 +268,7 @@ public:
 
 			console::print("JSON built up in memory; opening file to save.");
 
-			std::shared_ptr<FILE> file = std::shared_ptr<FILE>(fopen(m_filePath.get_ptr(), "w"), fclose);
+			std::shared_ptr<FILE> file = std::shared_ptr<FILE>(fopen(m_filePath.get_ptr(), "w"), [](FILE* file){ if(file) fclose(file); });
 
 			if(!file)
 			{
@@ -288,16 +288,7 @@ public:
 
 			document.Accept(writer);
 
-			const int fclose_status = fclose(file.get());
-
-			if(fclose_status != 0)
-			{
-				console::print("Error closing file; may not have written correctly.");
-			}
-			else
-			{
-				console::print("File written successfully.");
-			}
+			console::print("File written successfully.");
 		}
 		catch(const exception_aborted&)
 		{
