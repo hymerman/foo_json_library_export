@@ -3,7 +3,7 @@ foo_json_library_export
 
 Foobar2000 component to export the contents of the music library as a JSON file.
 
-This component simply exports the music library as one massive JSON file, containing all track info, metadata, playback statistics and last.fm sync data marc2003's script may have saved to foo_customdb.
+This component simply exports the music library as one massive JSON file, containing all track info, metadata, playback statistics and any last.fm sync data marc2003's script may have saved to foo_customdb.
 
 Usage
 =====
@@ -30,7 +30,7 @@ Other Useful Links
 
 Discussion thread:
 
-None yet; will be created on first release.
+http://www.hydrogenaudio.org/forums/index.php?showtopic=105613
 
 Github page:
 
