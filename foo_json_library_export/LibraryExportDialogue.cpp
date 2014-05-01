@@ -31,6 +31,10 @@ void add_string_value_to_json_object_if_not_empty(const char* string_key, const 
 	}
 }
 
+// {744A7590-0DE7-4429-B31E-9B30FDBE2545}
+static const GUID config_export_path_guid = { 0x744a7590, 0xde7, 0x4429, { 0xb3, 0x1e, 0x9b, 0x30, 0xfd, 0xbe, 0x25, 0x45 } };
+cfg_string config_export_path(config_export_path_guid, "");
+
 } // anonymous namespace
 
 namespace libraryexport
@@ -54,8 +58,7 @@ private:
 
 	BOOL OnInitDialog(CWindow, LPARAM)
 	{
-		// todo: store this value between dialogue invocations.
-		SetDlgItemText(IDC_FILE_PATH_TEXT, _T(""));
+		uSetDlgItemText(*this, IDC_FILE_PATH_TEXT, config_export_path);
 		ShowWindowCentered(*this, GetParent()); // Function declared in SDK helpers.
 		return TRUE;
 	}
@@ -74,6 +77,7 @@ private:
 
 		pfc::string8 filePath;
 		uGetDlgItemText(*this, IDC_FILE_PATH_TEXT, filePath);
+		config_export_path = filePath;
 
 		console::printf("Chosen path: %s", filePath.get_ptr());
 
