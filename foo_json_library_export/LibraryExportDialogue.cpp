@@ -13,22 +13,23 @@
 
 namespace
 {
-	pfc::string8 title_format(const metadb_handle_ptr& track, const file_info& fileInfo, const titleformat_object::ptr& script)
-	{
-		pfc::string8 formatted;
-		track->format_title_from_external_info_nonlocking(fileInfo, nullptr, formatted, script, nullptr);
-		return formatted;
-	}
 
-	// string_key must exist until after the JSON object is destroyed, as a copy will not be taken.
-	void add_string_value_to_json_object_if_not_empty(const char* string_key, const pfc::string8& string_value, rapidjson::Value& json_object, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>& allocator)
+pfc::string8 title_format(const metadb_handle_ptr& track, const file_info& fileInfo, const titleformat_object::ptr& script)
+{
+	pfc::string8 formatted;
+	track->format_title_from_external_info_nonlocking(fileInfo, nullptr, formatted, script, nullptr);
+	return formatted;
+}
+
+// string_key must exist until after the JSON object is destroyed, as a copy will not be taken.
+void add_string_value_to_json_object_if_not_empty(const char* string_key, const pfc::string8& string_value, rapidjson::Value& json_object, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>& allocator)
+{
+	if(!string_value.is_empty())
 	{
-		if(!string_value.is_empty())
-		{
-			rapidjson::Value json_value(string_value.get_ptr(), allocator);
-			json_object.AddMember(string_key, json_value, allocator);
-		}
+		rapidjson::Value json_value(string_value.get_ptr(), allocator);
+		json_object.AddMember(string_key, json_value, allocator);
 	}
+}
 
 } // anonymous namespace
 
