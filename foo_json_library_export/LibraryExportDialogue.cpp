@@ -347,6 +347,7 @@ public:
 
 	BEGIN_MSG_MAP(LibraryExportDialogue)
 		MSG_WM_INITDIALOG(OnInitDialog)
+		COMMAND_HANDLER_EX(IDC_BROWSE_BUTTON, BN_CLICKED, OnChooseFile)
 		COMMAND_HANDLER_EX(IDOK, BN_CLICKED, OnOk)
 		COMMAND_HANDLER_EX(IDCANCEL, BN_CLICKED, OnCancel)
 	END_MSG_MAP()
@@ -365,6 +366,16 @@ private:
 		exportLibrary();
 
 		DestroyWindow();
+	}
+
+	void OnChooseFile(UINT, int, CWindow)
+	{
+		WTL::CFileDialog fileSaveDialogue(FALSE, L"json");//, currentValue, flags, filter, parent);
+
+		if(fileSaveDialogue.DoModal() == IDOK)
+		{
+			SetDlgItemText(IDC_FILE_PATH_TEXT, fileSaveDialogue.m_szFileName);
+		}
 	}
 
 	void exportLibrary()

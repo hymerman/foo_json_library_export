@@ -8,4 +8,5 @@
 #pragma warning (disable: 4245) // conversion from X to Y, signed/unsigned mismatch
 #pragma warning (disable: 4389) // signed/unsigned mismatch
 #include "foobar2000/ATLHelpers/ATLHelpers.h"
+#include <atldlgs.h>
 #pragma warning (pop)
