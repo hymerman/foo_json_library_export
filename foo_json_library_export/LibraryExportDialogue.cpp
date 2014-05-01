@@ -123,7 +123,7 @@ private:
 			const file_info* fileInfo = nullptr;
 			const bool success = track->get_info_locked(fileInfo);
 
-			if(!success)
+			if(!success || !fileInfo)
 			{
 				console::printf("Failed to get info on track: %s", track->get_path());
 				return;
