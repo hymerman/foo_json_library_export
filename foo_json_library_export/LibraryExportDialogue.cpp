@@ -277,8 +277,7 @@ private:
 
 		console::print("JSON built up in memory; opening file to save.");
 
-		// todo: error checking.
-		FILE* file = fopen(filePath.get_ptr(), "w");
+		std::shared_ptr<FILE> file = std::shared_ptr<FILE>(fopen(filePath.get_ptr(), "w"), fclose);
 
 		if(!file)
 		{
@@ -288,7 +287,7 @@ private:
 
 		static const size_t fileWriteBufferSize = 2048;
 		char fileWriteBuffer[fileWriteBufferSize];
-		rapidjson::FileWriteStream fileStream(file, fileWriteBuffer, fileWriteBufferSize);
+		rapidjson::FileWriteStream fileStream(file.get(), fileWriteBuffer, fileWriteBufferSize);
 		// todo: add UI option for pretty print.
 		//rapidjson::Writer<rapidjson::FileWriteStream> writer(fileStream);
 		rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(fileStream);
@@ -297,12 +296,11 @@ private:
 
 		document.Accept(writer);
 
-		// todo: error checking.
-		const int fclose_status = fclose(file);
+		const int fclose_status = fclose(file.get());
 
 		if(fclose_status != 0)
 		{
-			console::print("Error writing file.");
+			console::print("Error closing file; may not have written correctly.");
 		}
 		else
 		{
