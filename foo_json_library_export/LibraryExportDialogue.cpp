@@ -31,6 +31,19 @@ void add_string_value_to_json_object_if_not_empty(const char* string_key, const 
 	}
 }
 
+FILE* fopen_or_exception(const char* fileName, const char* mode)
+{
+	if(!fileName || !mode)
+	{
+		throw std::invalid_argument("Invalid argument passed to fopen");
+	}
+
+#pragma warning (push)
+#pragma warning (disable: 4996)
+	return fopen(fileName, mode);
+#pragma warning (pop)
+}
+
 // {744A7590-0DE7-4429-B31E-9B30FDBE2545}
 static const GUID config_export_path_guid = { 0x744a7590, 0xde7, 0x4429, { 0xb3, 0x1e, 0x9b, 0x30, 0xfd, 0xbe, 0x25, 0x45 } };
 cfg_string config_export_path(config_export_path_guid, "");
@@ -63,7 +76,7 @@ public:
 
 			// Open the file for writing before doing anything else (to avoid wasting time in case it's not writable).
 			console::print("Opening output file.");
-			std::shared_ptr<FILE> file = std::shared_ptr<FILE>(fopen(m_filePath.get_ptr(), "w"), [](FILE* file){ if(file) fclose(file); });
+			std::shared_ptr<FILE> file = std::shared_ptr<FILE>(fopen_or_exception(m_filePath.get_ptr(), "w"), [](FILE* file){ if(file) fclose(file); });
 
 			if(!file)
 			{
