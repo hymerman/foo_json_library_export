@@ -61,6 +61,17 @@ public:
 			// Start the status off at 0%.
 			p_status.set_progress(0, 1);
 
+			// Open the file for writing before doing anything else (to avoid wasting time in case it's not writable).
+			console::print("Opening output file.");
+			std::shared_ptr<FILE> file = std::shared_ptr<FILE>(fopen(m_filePath.get_ptr(), "w"), [](FILE* file){ if(file) fclose(file); });
+
+			if(!file)
+			{
+				m_failureMessage = "Failed to open file for writing; aborting";
+				console::print(m_failureMessage);
+				return;
+			}
+
 			// Compile titleformatting scripts ahead of time.
 			console::print("Compiling titleformatting scripts ahead of time.");
 
@@ -266,16 +277,7 @@ public:
 				document.PushBack(trackValue, allocator);
 			}
 
-			console::print("JSON built up in memory; opening file to save.");
-
-			std::shared_ptr<FILE> file = std::shared_ptr<FILE>(fopen(m_filePath.get_ptr(), "w"), [](FILE* file){ if(file) fclose(file); });
-
-			if(!file)
-			{
-				m_failureMessage = "Failed to open file for writing; aborting";
-				console::print(m_failureMessage);
-				return;
-			}
+			console::print("JSON built up in memory; saving to output file.");
 
 			static const size_t fileWriteBufferSize = 2048;
 			char fileWriteBuffer[fileWriteBufferSize];
